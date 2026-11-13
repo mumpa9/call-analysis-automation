@@ -1,40 +1,85 @@
-Call Analysis Automation
-An AI-powered system for analyzing phone calls and extracting structured information.
-Project status: In development
-Overview
-This project automates the analysis of phone conversations using AI.
-The system processes audio recordings, extracts important information about the conversation, and saves the results in a structured format.
-Workflow
-1.	A phone call recording is uploaded to Google Drive.
-2.	n8n detects and processes the recording.
-3.	An AI model analyzes the audio.
-4.	Important information is extracted into structured fields.
-5.	The results are saved to Google Sheets.
-Technologies Used
-•	n8n - workflow automation
-•	Google Drive - audio file storage
-•	Google Gemini - AI-powered audio analysis
-•	Google Sheets - structured data storage
-Extracted Information
-The system is designed to identify:
-•	Client name and phone number
-•	Company and product
-•	Budget and interest level
-•	Customer questions and objections
-•	Manager promises
-•	Conversation summary
-•	Recommended next steps
-Current Limitations
-•	Audio recordings are uploaded manually.
-•	Some workflow steps still require improvement.
-•	The system is not yet fully automated.
-Future Improvements
-•	Fully automate audio recording processing.
-•	Improve data validation and error handling.
-•	Add a Python backend using FastAPI.
-•	Introduce a database for storing call information.
-•	Develop a web interface for viewing analytics.
-Privacy
-Demonstrations use synthetic data. Real phone recordings, personal information, API keys, and access tokens are not published.
-________________________________________
-This project is being developed as a practical learning project in AI Engineering and backend development.
+# Call Analysis Automation
+
+> Status: in development — portfolio project.
+
+AI-powered system that turns sales call recordings into structured CRM data:
+transcription, client intent scoring, and consent-based follow-up — fully
+automated with n8n and Google Gemini.
+
+## Overview
+
+Sales teams lose time manually listening to calls and filling CRM fields.
+This project automates the loop: a manager drops a call recording into
+Google Drive, and the workflow transcribes it, extracts deal-relevant data,
+logs everything to Google Sheets, and triggers the appropriate follow-up
+(email or reminder) based on the client's consent.
+
+Tested on synthetic recordings to keep real client data private.
+
+## Features
+
+- End-to-end pipeline: from a recording in Google Drive to a structured CRM row.
+- Full call transcription and a concise summary.
+- Extraction of 14 structured fields: client, company, product, budget,
+  total offer, phone, call type, interest level, purchase probability,
+  client status, next step, tags, and more.
+- Deterministic phone-number guardrail: the LLM reports the number exactly
+  as heard; JavaScript validates format and flags uncertain rows for manual
+  review instead of silently "fixing" them.
+- Consent-based follow-up: three email scenarios or a reminder.
+- Privacy-first testing on synthetic call data.
+
+## Technologies Used
+
+| Component | Technology |
+|---|---|
+| Workflow automation | n8n (self-hosted) |
+| Speech understanding & extraction | Google Gemini API (`gemini-3.5-flash`) |
+| Recording storage | Google Drive |
+| CRM log | Google Sheets |
+| Follow-up emails | Gmail |
+| Data processing & validation | JavaScript (n8n Code node) |
+
+## Workflow Architecture
+
+```
+Google Drive (new recording)
+        |
+        v
+[Trigger] -> [Download] -> [Gemini: Analyze Audio] -> [Code: parse & validate]
+                                                            |
+                                                            v
+                                                      Google Sheets
+                                                            |
+                                          consent? ---------+--------- no consent?
+                                            |                             |
+                                            v                             v
+                                     Gmail follow-up                Reminder / next step
+```
+
+### Design decisions
+
+- **LLM perceives, code validates.** Digit counting, format checks, and
+  normalization are deterministic and live in JavaScript, not in the prompt.
+- **Honest pass-through.** The model is forbidden from truncating or padding
+  phone numbers; suspicious values are flagged, never invented.
+- **Output sanitization.** The Code node strips Markdown fences and extracts
+  the JSON body, so formatting quirks of the LLM cannot break the pipeline.
+- **Model selection under constraints.** `gemini-3.5-flash` chosen for the
+  free tier: stable, available, and strong enough for audio extraction.
+
+## Current Limitations
+
+- Recordings are uploaded manually (no telephony integration yet).
+- The client contact table is maintained manually.
+- Runs on the Gemini free tier: rate limits apply, and model availability
+  changes over time.
+- Uncertain phone numbers go to manual review rather than being auto-corrected.
+- Current tests cover Russian-language calls only.
+
+## Future Improvements
+
+- Automatic call ingestion from telephony or CRM.
+- Two-stage extraction: dedicated transcription model, then LLM structuring.
+- Review queue for flagged rows and an analytics dashboard.
+- Python + FastAPI backend for custom processing and API access.
