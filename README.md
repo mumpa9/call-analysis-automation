@@ -42,20 +42,19 @@ Tested on synthetic recordings to keep real client data private.
 
 ## Workflow Architecture
 
-```
 Google Drive (new recording)
         |
         v
-[Trigger] -> [Download] -> [Gemini: Analyze Audio] -> [Code: parse & validate]
-                                                            |
-                                                            v
-                                                      Google Sheets
-                                                            |
-                                          consent? ---------+--------- no consent?
-                                            |                             |
-                                            v                             v
-                                     Gmail follow-up                Reminder / next step
-```
+[Trigger] -> [Download] -> [Gemini: Analyze audio] -> [Code: parse & validate]
+        |
+        v
+[Switch] -> [Google Sheets: append row]
+        |
+        v
+[Switch1] -- consent --> [LLM Chain  + Gemini] -> [Gmail: client]
+        |            \-> [LLM Chain1 + Gemini] -> [Gmail1: company]
+        |-- waiting --> [LLM Chain2 + Gemini] -> [Gmail2: reminder]
+        |-- refusal --> (stop; row already logged in Sheets)
 
 ![n8n workflow](workflow.jpg)
 
