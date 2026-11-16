@@ -57,6 +57,8 @@ Google Drive (new recording)
                                      Gmail follow-up                Reminder / next step
 ```
 
+![n8n workflow](workflow.jpg)
+
 ### Design decisions
 
 - **LLM perceives, code validates.** Digit counting, format checks, and
