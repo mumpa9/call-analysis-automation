@@ -41,7 +41,7 @@ Tested on synthetic recordings to keep real client data private.
 | Data processing & validation | JavaScript (n8n Code node) |
 
 ## Workflow Architecture
-...
+```
 Google Drive (new recording)
         |
         v
@@ -55,7 +55,7 @@ Google Drive (new recording)
         |            \-> [LLM Chain1 + Gemini] -> [Gmail1: company]
         |-- waiting --> [LLM Chain2 + Gemini] -> [Gmail2: reminder]
         |-- refusal --> (stop; row already logged in Sheets)
-...
+```
 ![n8n workflow](workflow.jpg)
 
 ### Design decisions
